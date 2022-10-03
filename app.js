@@ -2,6 +2,7 @@ require('dotenv').config();
 const http = require('http');
 const express = require('express');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
 const { DataSource } = require('typeorm');
 
 const myDataSource = new DataSource({
@@ -25,11 +26,11 @@ app.use(cors()); // 모든 cors요청 허용
 
 app.post('/users', async (req, res) => {
     const {email, nickname, password, profileImage} = req.body;
-
+    const hashedPassword = await bcrypt.hash(password, 10);
     await myDataSource.query(
         `INSERT INTO users (email, nickname, password, profile_image)
         VALUES (?, ?, ?, ?)`
-        , [email, nickname, password, profileImage]);
+        , [email, nickname, hashedPassword, profileImage]);
     
     res.status(201).json({"message" : "userCreated"});
 });
